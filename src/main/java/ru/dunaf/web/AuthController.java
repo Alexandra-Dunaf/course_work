@@ -15,7 +15,7 @@ import ru.dunaf.payload.request.SignupRequest;
 import ru.dunaf.payload.response.JWTTokenSuccesResponse;
 import ru.dunaf.payload.response.MessageResponse;
 import ru.dunaf.security.JWTTokenProvider;
-import ru.dunaf.security.SecurityConstans;
+import ru.dunaf.security.SecurityConstants;
 import ru.dunaf.services.UserService;
 import ru.dunaf.validations.ResponseErrorValidation;
 
@@ -36,7 +36,6 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-
     @PostMapping("/signin")
     public ResponseEntity<Object> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
@@ -48,7 +47,7 @@ public class AuthController {
         ));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = SecurityConstans.TOKEN_PREFIX + jwtTokenProvider.generateToken(authentication);
+        String jwt = SecurityConstants.TOKEN_PREFIX + jwtTokenProvider.generateToken(authentication);
 
         return ResponseEntity.ok(new JWTTokenSuccesResponse(true, jwt));
     }
@@ -62,4 +61,5 @@ public class AuthController {
         userService.createUser(signupRequest);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
 }
