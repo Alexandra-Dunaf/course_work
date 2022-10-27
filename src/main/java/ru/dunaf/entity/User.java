@@ -50,6 +50,8 @@ public class User implements UserDetails {
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 
+    public User() {}
+
     public User(Long id, String username, String email, String password, List<GrantedAuthority> authorities) {
     }
 
