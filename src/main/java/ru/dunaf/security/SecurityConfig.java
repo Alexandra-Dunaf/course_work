@@ -21,15 +21,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-//@EnableWebSecurity
 @EnableGlobalMethodSecurity(
-//        (securedEnabled = true,
-//        jsr250Enabled = true,
         prePostEnabled = true)
-//)
-public class SecurityConfig {
-//        extends WebSecurityConfigurerAdapter {
 
+public class SecurityConfig {
     @Autowired
     private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @Autowired
@@ -43,10 +38,8 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(customUserDetailsService);
         authProvider.setPasswordEncoder(bCryptPasswordEncoder());
-
         return authProvider;
     }
 
@@ -60,55 +53,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http.cors().and().csrf().disable()
-//                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .authorizeRequests()
-//                .antMatchers(SecurityConstants.SIGN_UP_URLS).permitAll()
-//                .anyRequest().authenticated();
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers(SecurityConstants.SIGN_UP_URLS).permitAll()
-                //.antMatchers("/api/test/**").permitAll()
                 .anyRequest().authenticated();
-
-
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
-
-    }
-
-
-
-
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(customUserDetailsService).passwordEncoder(bCryptPasswordEncoder());
-//    }
-
-
-
-//    @Override
-//    @Bean(BeanIds.AUTHENTICATION_MANAGER)
-//    protected AuthenticationManager authenticationManager() throws Exception {
-//        return super.authenticationManager();
-//    }
-
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return (web) -> web.ignoring().antMatchers("/js/**", "/images/**");
-//    }
-
-
+            }
 }
