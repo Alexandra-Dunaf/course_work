@@ -1,5 +1,6 @@
 package ru.dunaf.services;
 
+import ru.dunaf.dto.UserDTO;
 import ru.dunaf.entity.User;
 import ru.dunaf.entity.enums.Role;
 import ru.dunaf.exceptions.UserExistException;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.security.Principal;
 
 
 @Service
@@ -44,8 +47,26 @@ public class UserService {
         }
     }
 
-
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    public User updateUser(UserDTO userDTO, Principal principal) {
+        User user = getUserByPrincipal(principal);
+        user.setName(userDTO.getFirstname());
+        user.setLastname(userDTO.getLastname());
+        user.setBiography(userDTO.getBiography());
+        return userRepository.save(user);
+
+    }
+
+    public User getCurrentUser(Principal principal) {
+        return getUserByPrincipal(principal);
+    }
+
+    private User getUserByPrincipal(Principal principal) {
+        String username = principal.getName();
+        return userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found with username" + username));
     }
 }
