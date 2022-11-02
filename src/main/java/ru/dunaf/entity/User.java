@@ -1,38 +1,32 @@
 package ru.dunaf.entity;
 
+import ru.dunaf.entity.enums.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ru.dunaf.entity.enums.Role;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
-@Data
 @Entity
+@Data
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(nullable = false)
     private String name;
-
     @Column(unique = true, updatable = false)
     private String username;
-
     @Column(nullable = false)
     private String lastname;
-
     @Column(unique = true)
     private String email;
-
     @Column(columnDefinition = "text")
-    private String biography;
-
+    private String bio;
     @Column(length = 3000)
     private String password;
 
@@ -43,29 +37,39 @@ public class User implements UserDetails {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
+
     @JsonFormat(pattern = "yyyy-mm-dd HH:mm:ss")
     @Column(updatable = false)
-    private LocalDate createdDate;
+    private LocalDateTime createdDate;
 
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 
-    public User() {}
-
-    public User(Long id, String username, String email, String password, List<GrantedAuthority> authorities) {
+    public User() {
     }
 
-    public User(Long id, String username, String email, Collection<? extends GrantedAuthority> authorities) {
+    public User(Long id,
+                String username,
+                String email,
+                String password,
+                Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.password = password;
         this.authorities = authorities;
     }
 
     @PrePersist
     protected void onCreate() {
-        this.createdDate = LocalDate.now();
+        this.createdDate = LocalDateTime.now();
     }
+
+    /**
+     * SECURITY
+     */
+
+
 
     @Override
     public String getPassword() {
@@ -92,3 +96,4 @@ public class User implements UserDetails {
         return true;
     }
 }
+

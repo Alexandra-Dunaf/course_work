@@ -1,15 +1,16 @@
 package ru.dunaf.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 import ru.dunaf.entity.User;
 import ru.dunaf.entity.enums.Role;
 import ru.dunaf.exceptions.UserExistException;
 import ru.dunaf.payload.request.SignupRequest;
 import ru.dunaf.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -37,10 +38,14 @@ public class UserService {
         try {
             LOG.info("Saving User {}", userIn.getEmail());
             return userRepository.save(user);
-        } catch (Exception ex) {
-            LOG.error("Error during. {}", ex.getMessage());
-            throw new UserExistException("The User " + user.getUsername() + " already exist. Please check credintials");
+        } catch (Exception e) {
+            LOG.error("Error during registration. {}", e.getMessage());
+            throw new UserExistException("The user " + user.getUsername() + " already exist. Please check credentials");
         }
+    }
 
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

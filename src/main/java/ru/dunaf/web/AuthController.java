@@ -1,5 +1,13 @@
 package ru.dunaf.web;
 
+import ru.dunaf.payload.response.JWTTokenSuccessResponse;
+import ru.dunaf.payload.response.MessageResponse;
+import ru.dunaf.payload.request.LoginRequest;
+import ru.dunaf.payload.request.SignupRequest;
+import ru.dunaf.security.JWTTokenProvider;
+import ru.dunaf.security.SecurityConstants;
+import ru.dunaf.services.UserService;
+import ru.dunaf.validations.ResponseErrorValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,14 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.dunaf.payload.request.LoginRequest;
-import ru.dunaf.payload.request.SignupRequest;
-import ru.dunaf.payload.response.JWTTokenSuccesResponse;
-import ru.dunaf.payload.response.MessageResponse;
-import ru.dunaf.security.JWTTokenProvider;
-import ru.dunaf.security.SecurityConstants;
-import ru.dunaf.services.UserService;
-import ru.dunaf.validations.ResponseErrorValidation;
 
 import javax.validation.Valid;
 
@@ -36,6 +36,7 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+
     @PostMapping("/signin")
     public ResponseEntity<Object> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
@@ -45,11 +46,9 @@ public class AuthController {
                 loginRequest.getUsername(),
                 loginRequest.getPassword()
         ));
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = SecurityConstants.TOKEN_PREFIX + jwtTokenProvider.generateToken(authentication);
-
-        return ResponseEntity.ok(new JWTTokenSuccesResponse(true, jwt));
+        return ResponseEntity.ok(new JWTTokenSuccessResponse(true, jwt));
     }
 
 

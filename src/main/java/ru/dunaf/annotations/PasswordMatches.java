@@ -1,6 +1,7 @@
 package ru.dunaf.annotations;
 
 import ru.dunaf.validations.PasswordMatchesValidator;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
