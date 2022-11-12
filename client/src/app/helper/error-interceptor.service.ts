@@ -26,6 +26,6 @@ export class ErrorInterceptorService implements HttpInterceptor{
   }
 }
 
-export const authErrorInterceptorProvider = [
-  {provide: HTTP_INTERCEPTORS, userClass: ErrorInterceptorService, multi: true}
+export const authErrorInterceptorProviders = [
+  {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptorService, multi: true}
 ];
