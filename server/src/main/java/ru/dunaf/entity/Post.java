@@ -31,6 +31,9 @@ public class Post {
     @Column(updatable = false)
     private LocalDateTime createdDate;
 
+    public Post() {
+    }
+
     @PrePersist
     protected void onCreate()
     {

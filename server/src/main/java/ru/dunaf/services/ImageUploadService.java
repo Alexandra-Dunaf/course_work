@@ -26,8 +26,8 @@ import java.util.zip.Inflater;
 
 @Service
 public class ImageUploadService {
-
     public static final Logger LOG = LoggerFactory.getLogger(ImageUploadService.class);
+
     private ImageRepository imageRepository;
     private UserRepository userRepository;
     private PostRepository postRepository;
@@ -39,43 +39,48 @@ public class ImageUploadService {
         this.postRepository = postRepository;
     }
 
-
-    public ImageModel uploadImageToUser(MultipartFile multipartFile, Principal principal) throws IOException {
+    public ImageModel uploadImageToUser(MultipartFile file, Principal principal) throws IOException {
         User user = getUserByPrincipal(principal);
-        LOG.info("Uploading image profile to User: {}", user.getUsername());
-        ImageModel userProfileImage = imageRepository.findByUserId(user.getId())
-                .orElse(null);
+        LOG.info("Uploading image profile to User {}", user.getUsername());
+
+        ImageModel userProfileImage = imageRepository.findByUserId(user.getId()).orElse(null);
         if (!ObjectUtils.isEmpty(userProfileImage)) {
             imageRepository.delete(userProfileImage);
         }
+
         ImageModel imageModel = new ImageModel();
         imageModel.setUserId(user.getId());
-        imageModel.setImageBytes(compressBytes(multipartFile.getBytes()));
-        imageModel.setName(multipartFile.getOriginalFilename());
+        imageModel.setImageBytes(compressBytes(file.getBytes()));
+        imageModel.setName(file.getOriginalFilename());
         return imageRepository.save(imageModel);
     }
 
-    public ImageModel getImageToUser(Principal principal) {
-        User user = getUserByPrincipal(principal);
-        ImageModel imageModel = imageRepository.findByUserId(user.getId()).orElse(null);
-        if (!ObjectUtils.isEmpty(imageModel)) {
-            imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
-        }
-        return imageModel;
-    }
-
-    public ImageModel uploadImageToPost(MultipartFile multipartFile, Principal principal, Long postId) throws IOException {
+    public ImageModel uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
         User user = getUserByPrincipal(principal);
         Post post = user.getPosts()
                 .stream()
                 .filter(p -> p.getId().equals(postId))
                 .collect(toSinglePostCollector());
+
         ImageModel imageModel = new ImageModel();
         imageModel.setPostId(post.getId());
-        imageModel.setImageBytes(multipartFile.getBytes());
-        imageModel.setImageBytes(compressBytes(multipartFile.getBytes()));
-        imageModel.setName(multipartFile.getOriginalFilename());
+        imageModel.setImageBytes(file.getBytes());
+        imageModel.setImageBytes(compressBytes(file.getBytes()));
+        imageModel.setName(file.getOriginalFilename());
+        LOG.info("Uploading image to Post {}", post.getId());
+
         return imageRepository.save(imageModel);
+    }
+
+    public ImageModel getImageToUser(Principal principal) {
+        User user = getUserByPrincipal(principal);
+
+        ImageModel imageModel = imageRepository.findByUserId(user.getId()).orElse(null);
+        if (!ObjectUtils.isEmpty(imageModel)) {
+            imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
+        }
+
+        return imageModel;
     }
 
     public ImageModel getImageToPost(Long postId) {
@@ -84,6 +89,7 @@ public class ImageUploadService {
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
         }
+
         return imageModel;
     }
 
@@ -126,7 +132,8 @@ public class ImageUploadService {
     private User getUserByPrincipal(Principal principal) {
         String username = principal.getName();
         return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found with username" + username));
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found with username " + username));
+
     }
 
     private <T> Collector<T, ?, T> toSinglePostCollector() {
